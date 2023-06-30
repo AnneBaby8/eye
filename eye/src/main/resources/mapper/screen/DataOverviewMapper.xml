@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.screen.mapper.DataOverviewMapper">
+
+    <!--查询近七日数据-->
+    <select id="selectPeriodData" parameterType="cn.com.citydo.module.screen.dto.OverviewDataDTO" resultType="cn.com.citydo.module.screen.vo.EventCountVO">
+        <![CDATA[
+            select
+                count( 1 ) as countNumber,
+                date_format( t1.warn_time, '%Y-%m-%d' ) dateFormat
+            from
+                workflow t1
+                left outer join device t2 on t1.stream_id = t2.stream_id
+                left outer join event_warning t3 on t1.event_warning_id=  t3.id
+        ]]>
+            <where>
+                <![CDATA[ date_sub( curdate( ), interval 7 day ) < t1.warn_time and t1.del = 0 ]]>
+                <if test="warnType != null and warnType != '' ">
+                   and t3.warn_type = #{warnType}
+                </if>
+                <if test=" areaId != null ">
+                    <![CDATA[ AND t2.area_id = #{areaId} ]]>
+                </if>
+                <if test=" streetId != null ">
+                    <![CDATA[ AND t2.street_id = #{streetId} ]]>
+                </if>
+                <if test=" socialId != null ">
+                    <![CDATA[ AND t2.social_id = #{socialId} ]]>
+                </if>
+                <if test=" gridId != null ">
+                    <![CDATA[ AND t2.grid_id = #{gridId} ]]>
+                </if>
+             </where>
+        <![CDATA[ group by date_format( t1.warn_time, '%Y-%m-%d' ) order by 2 asc ]]>
+
+    </select>
+
+    <!--获取本期数据-->
+    <select id="selectNextCycleData" parameterType="cn.com.citydo.module.screen.dto.OverviewDataDTO" resultType="java.lang.Long">
+        <![CDATA[
+            SELECT COUNT( * ) as 'nextCycle'
+                from workflow t1
+                left outer join device t2 on t1.stream_id = t2.stream_id
+                left outer join event_warning t3 on t1.event_warning_id=  t3.id
+        ]]>
+            <where>
+                <![CDATA[ t1.del = 0 ]]>
+                <if test="warnType != null and warnType != '' ">
+                    <![CDATA[ AND t3.warn_type = #{warnType} ]]>
+                </if>
+                <if test=" areaId != null ">
+                    <![CDATA[ AND t2.area_id = #{areaId} ]]>
+                </if>
+                <if test=" streetId != null ">
+                    <![CDATA[ AND t2.street_id = #{streetId} ]]>
+                </if>
+                <if test=" socialId != null ">
+                    <![CDATA[ AND t2.social_id = #{socialId} ]]>
+                </if>
+                <if test=" gridId != null ">
+                    <![CDATA[ AND t2.grid_id = #{gridId} ]]>
+                </if>
+                <if test="selfDisposalType != null and selfDisposalType != '' ">
+                    <![CDATA[ AND t1.self_disposal_type = #{selfDisposalType} ]]>
+                </if>
+                <if test=' chainType == "0" '>
+                <![CDATA[ AND DATE_FORMAT( t1.warn_time, '%Y-%m-%d' ) = DATE_FORMAT( CURDATE( ), '%Y-%m-%d' ) ]]>
+                </if>
+                <if test='chainType == "1"'>
+                    <![CDATA[ AND YEARWEEK(date_format(t1.warn_time,'%Y-%m-%d'),1) = YEARWEEK(now(),1) ]]>
+                </if>
+                <if test='chainType == "2"'>
+                     <![CDATA[ AND DATE_FORMAT( t1.warn_time, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' ) ]]>
+                </if>
+                <if test='chainType == "3"'>
+                     <![CDATA[ AND YEAR(t1.warn_time)=YEAR(NOW()) ]]>
+                </if>
+             </where>
+    </select>
+
+    <!--获取上期数据-->
+    <select id="selectLastCycleData" parameterType="cn.com.citydo.module.screen.dto.OverviewDataDTO" resultType="java.lang.Long">
+        <![CDATA[
+            SELECT COUNT( * ) as 'lastCycle'
+             from workflow t1
+             left outer join device t2 on t1.stream_id = t2.stream_id
+             left outer join event_warning t3 on t1.event_warning_id=  t3.id
+        ]]>
+        <where>
+            <![CDATA[ t1.del = 0 ]]>
+            <if test="warnType != null and warnType != '' ">
+                <![CDATA[ AND t3.warn_Type = #{warnType} ]]>
+            </if>
+            <if test=" areaId != null ">
+                <![CDATA[ AND t2.area_id = #{areaId} ]]>
+            </if>
+            <if test=" streetId != null ">
+                <![CDATA[ AND t2.street_id = #{streetId} ]]>
+            </if>
+            <if test=" socialId != null ">
+                <![CDATA[ AND t2.social_id = #{socialId} ]]>
+            </if>
+            <if test=" gridId != null ">
+                <![CDATA[ AND t2.grid_id = #{gridId} ]]>
+            </if>
+            <if test="selfDisposalType != null and selfDisposalType != '' ">
+                <![CDATA[ AND t1.self_disposal_type = #{selfDisposalType} ]]>
+            </if>
+            <if test='chainType == "0"'>
+                <![CDATA[ AND DATE_FORMAT( t1.warn_time, '%Y-%m-%d' ) = DATE_FORMAT( subdate(CURDATE( ),1), '%Y-%m-%d' ) ]]>
+            </if>
+            <if test='chainType == "1"'>
+                <![CDATA[ AND YEARWEEK(date_format(t1.warn_time,'%Y-%m-%d'),1) = YEARWEEK(now())-1 ]]>
+            </if>
+            <if test='chainType == "2"'>
+                <![CDATA[ AND PERIOD_DIFF( date_format( now( ) , '%Y%m' ) , date_format( t1.warn_time, '%Y%m' ) ) =1 ]]>
+            </if>
+            <if test='chainType == "3"'>
+                <![CDATA[ AND  year(t1.warn_time)=year(date_sub(now(),interval 1 year)) ]]>
+            </if>
+        </where>
+    </select>
+</mapper>

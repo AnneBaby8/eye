@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.core.mapper.DeviceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.core.entity.Device">
+        <result column="id" property="id" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="updator" property="updator" />
+        <result column="update_time" property="updateTime" />
+        <result column="del" property="del" />
+        <result column="stream_id" property="streamId" />
+        <result column="grid_id" property="gridId" />
+        <result column="street_id" property="streetId" />
+        <result column="name" property="name" />
+        <result column="address" property="address" />
+        <result column="longitude" property="longitude" />
+        <result column="latitude" property="latitude" />
+        <result column="status" property="status" />
+        <result column="algorithm" property="algorithm" />
+        <result column="direction" property="direction" />
+    </resultMap>
+
+    <!--数据概览-设备列表-->
+    <!--<select id="selectOverviewDeviceData" resultType="cn.com.citydo.module.core.vo.OverviewDeviceVO">
+        <![CDATA[
+        SELECT
+        t1.stream_id,
+        t1.name streamName,
+        t2.warn_type,
+        t2.count eventCount,
+        t1.area_id,
+        t1.street_id,
+        t1.social_id
+        FROM
+        device t1
+        INNER JOIN ( SELECT stream_id, warn_type, count( * ) count FROM event_warning GROUP BY stream_id, warn_type ) t2 ON t1.stream_id = t2.stream_id
+        ]]>
+        <where>
+            <![CDATA[ t1.del = '0' ]]>
+            <if test=" overviewDataDTO.departmentId != null ">
+                <if test="overviewDataDTO.areaId != null">
+                    <![CDATA[ AND t1.area_id = #{overviewDataDTO.areaId} ]]>
+                </if>
+                <if test="overviewDataDTO.streetId != null">
+                    <![CDATA[ AND t1.street_id = #{overviewDataDTO.streetId} ]]>
+                </if>
+                <if test="overviewDataDTO.socialId != null">
+                    <![CDATA[ AND t1.social_id = #{overviewDataDTO.socialId} ]]>
+                </if>
+                <if test="overviewDataDTO.gridId != null">
+                    <![CDATA[ AND t1.grid_Id = #{overviewDataDTO.gridId} ]]>
+                </if>
+            </if>
+            <if test="overviewDataDTO.warnType != null and overviewDataDTO.warnType != '' ">
+                <![CDATA[ and t2.warn_type = #{overviewDataDTO.warnType} ]]>
+            </if>
+        </where>
+    </select>-->
+
+    <select id="selectOverviewDeviceData" resultType="cn.com.citydo.module.core.vo.OverviewDeviceVO">
+        <![CDATA[
+        select t1.stream_id,
+                    t1.name streamName,
+                    t2.event_type warnType,
+                    t2.count eventCount,
+                    t1.area_id,
+                    t1.street_id,
+                    t1.social_id
+             from device t1
+            right outer join (
+                select t1.stream_id,t1.event_type ,count(*) count from workflow t1
+                left outer join device t2 on t1.stream_id = t2.stream_id
+                left outer join event_warning t3 on t1.event_warning_id=  t3.id
+                where t1.del = 0
+                ]]>
+                 <if test=" overviewDataDTO.departmentId != null ">
+                    <if test="overviewDataDTO.areaId != null">
+                        <![CDATA[ AND t1.area_id = #{overviewDataDTO.areaId} ]]>
+                    </if>
+                    <if test="overviewDataDTO.streetId != null">
+                        <![CDATA[ AND t1.street_id = #{overviewDataDTO.streetId} ]]>
+                    </if>
+                    <if test="overviewDataDTO.socialId != null">
+                        <![CDATA[ AND t1.social_id = #{overviewDataDTO.socialId} ]]>
+                    </if>
+                    <if test="overviewDataDTO.gridId != null">
+                        <![CDATA[ AND t1.grid_Id = #{overviewDataDTO.gridId} ]]>
+                    </if>
+                  </if>
+                    <if test="overviewDataDTO.warnType != null and overviewDataDTO.warnType != '' ">
+                        <![CDATA[ and t3.warn_type = #{overviewDataDTO.warnType} ]]>
+                    </if>
+        <![CDATA[ group by t1.stream_id,t1.event_type  )t2 on t1.stream_id = t2.stream_id order by t1.id desc ]]>
+    </select>
+    <select id="selectWarnTypeDataList" resultType="cn.com.citydo.module.core.vo.OverviewWarnTypeVO">
+        <![CDATA[
+            select distinct(t1.event_type) warn_type from workflow t1
+            left outer join device t2 on t1.stream_id = t2.stream_id
+            left outer join event_warning t3 on t1.event_warning_id=  t3.id
+            where t1.del = 0 ]]>
+        <if test=" overviewDataDTO.departmentId != null ">
+            <if test="overviewDataDTO.areaId != null">
+                <![CDATA[ AND t1.area_id = #{overviewDataDTO.areaId} ]]>
+            </if>
+            <if test="overviewDataDTO.streetId != null">
+                <![CDATA[ AND t1.street_id = #{overviewDataDTO.streetId} ]]>
+            </if>
+            <if test="overviewDataDTO.socialId != null">
+                <![CDATA[ AND t1.social_id = #{overviewDataDTO.socialId} ]]>
+            </if>
+            <if test="overviewDataDTO.gridId != null">
+                <![CDATA[ AND t1.grid_Id = #{overviewDataDTO.gridId} ]]>
+            </if>
+        </if>
+        <if test="overviewDataDTO.warnType != null and overviewDataDTO.warnType != '' ">
+            <![CDATA[ and t3.warn_type = #{overviewDataDTO.warnType} ]]>
+        </if>
+        <![CDATA[  order by t1.event_type asc ]]>
+    </select>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.core.mapper.FocusGroupMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.core.entity.FocusGroup">
+        <result column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="pic" property="pic" />
+        <result column="id_card" property="idCard" />
+        <result column="gender" property="gender" />
+        <result column="type" property="type" />
+        <result column="address" property="address" />
+        <result column="contact_way" property="contactWay" />
+        <result column="tag" property="tag" />
+    </resultMap>
+
+    <select id="selectFocusGroup" resultType="cn.com.citydo.module.core.vo.FocusGroupVO">
+        SELECT
+            c.stream_id AS streamId,
+            c.warn_type AS warnType,
+            c.address,
+            c.contact_way AS contactWay,
+            c.gender,
+            c.name,
+            c.photo,
+            c.tag,
+            c.pic
+        FROM
+            (
+            SELECT
+                a.stream_id AS stream_id,
+                a.warn_type AS warn_type,
+                b.address AS address,
+                b.phone AS contact_way,
+                b.sex AS gender,
+                b.username AS name,
+                b.picture AS photo,
+                b.tag AS tag,
+                b.capture AS pic,
+                FROM_UNIXTIME(a.timestamp,'%Y-%m-%d %H:%i:%s') AS occured_time
+            FROM
+                event_warning a
+                LEFT JOIN event_warning_detail b ON a.id = b.event_warning_id
+                WHERE a.warn_type in ("2", "3", "4")
+            ) c
+        LEFT JOIN device d ON c.stream_id = d.stream_id
+        <where>
+            1 = 1
+            <if test="query.zoneId != null and query.zoneId != ''">
+                <![CDATA[ AND (d.area_id = #{query.zoneId} OR d.social_id = #{query.zoneId} OR d.street_id = #{query.zoneId} OR d.grid_id = #{query.zoneId})]]>
+            </if>
+            <if test="query.name != null and query.name != ''">
+                <![CDATA[ AND c.name LIKE concat('%', #{query.name}, '%') ]]>
+            </if>
+            <if test="query.fromDate != null and query.fromDate != '' and query.endDate != null and query.endDate != ''">
+                <![CDATA[ AND c.occured_time BETWEEN #{query.fromDate} AND DATE_ADD(#{query.endDate}, INTERVAL 1 DAY) ]]>
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.core.mapper.DeviceGridMemberMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.core.entity.DeviceGridMember">
+        <result column="id" property="id"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="updator" property="updator"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del" property="del"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="grid_member_id" property="gridMemberId"/>
+    </resultMap>
+
+    <!--根据网格员删除数据-->
+    <update id="deleteByDeviceId" parameterType="java.util.List">
+        UPDATE device_grid_member set del = '1'
+        WHERE device_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <!--根据网格员和设备获取一条记录-->
+    <select id="selectOneByDeviceAndMember" parameterType="java.util.Map"
+            resultType="cn.com.citydo.module.core.entity.DeviceGridMember">
+        <![CDATA[
+         SELECT * FROM device_grid_member WHERE grid_member_id = #{gridMemberId} AND device_id = #{deviceId}
+        ]]>
+    </select>
+
+    <!--绑定记录-->
+    <select id="selectBindRecordList" resultType="cn.com.citydo.module.core.vo.DeviceBindVO">
+        <![CDATA[ select t2.area_id,t2.street_id,t1.device_id,t2.social_id,t2.`name` deviceName,t1.grid_member_id,
+        t1.create_time bindTime,t3.nickname gridMemberName from device_grid_member t1
+        left outer join device t2 on t1.device_id = t2.id
+        left outer join sec_user t3 on t1.grid_member_id = t3.id ]]>
+        <where>
+            t1.del = '0' and t2.del = '0' and t3.del = '0'
+            <if test="query.areaId != null">
+                <![CDATA[ AND t2.area_id = #{query.areaId} ]]>
+            </if>
+            <if test="query.streetId != null">
+                <![CDATA[ AND t2.street_id = #{query.streetId} ]]>
+            </if>
+            <if test="query.socialId != null">
+                <![CDATA[ AND t2.social_id = #{query.socialId} ]]>
+            </if>
+            <if test="query.gridId != null">
+                <![CDATA[ AND t2.grid_Id = #{query.gridId} ]]>
+            </if>
+            <if test="query.gridMemberName != null and query.gridMemberName != ''">
+                <![CDATA[ AND t3.nickname LIKE concat(concat("%",#{query.gridMemberName}),"%") ]]>
+            </if>
+            <if test="query.startTime != null and query.endTime != null ">
+
+                <![CDATA[ AND date_format(t1.create_time,'%Y-%m-%d') >= STR_TO_DATE(#{query.startTime},'%Y-%m-%d' ) AND date_format(t1.create_time,'%Y-%m-%d') <= STR_TO_DATE(#{query.endTime},'%Y-%m-%d')]]>
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.screen.mapper.EventWarningMapper">
+    <resultMap id="EventWarningMap" type="cn.com.citydo.module.screen.entity.EventWarning">
+
+    </resultMap>
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.screen.entity.EventWarning">
+        <id column="id" property="id" />
+        <result column="stream_id" property="streamId" />
+        <result column="event_type" property="eventType" />
+        <result column="timestamp" property="timestamp" />
+        <result column="image_base64" property="imageBase64" />
+        <result column="json" property="json" />
+        <result column="create_time" property="createTime" />
+        <result column="warn_type" property="warnType" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, stream_id, event_type, timestamp, image_base64, json, create_time, warn_type
+    </sql>
+
+    <select id="selectRealTimeEventsData" parameterType="cn.com.citydo.module.screen.dto.OverviewDataDTO" resultType="cn.com.citydo.module.core.vo.OverviewDeviceVO">
+        <![CDATA[ SELECT
+        t1.id,
+        t3.warn_type,
+        t1.warn_time,
+        t3.image_base64,
+        t2.NAME streamName,
+        t2.area_id,
+        t2.street_id,
+        t2.social_id
+        FROM
+          workflow t1
+                left outer join device t2 on t1.stream_id = t2.stream_id
+                left outer join event_warning t3 on t1.event_warning_id=  t3.id
+       ]]>
+        <where>
+            <![CDATA[ t1.del = '0' ]]>
+            <if test="warnType != null and warnType != '' ">
+                <![CDATA[ and t3.warn_type = #{warnType} ]]>
+            </if>
+            <if test="areaId != null">
+                <![CDATA[ AND t2.area_id = #{areaId} ]]>
+            </if>
+            <if test="streetId != null">
+                <![CDATA[ AND t2.street_id = #{streetId} ]]>
+            </if>
+            <if test="socialId != null">
+                <![CDATA[ AND t2.social_id = #{socialId} ]]>
+            </if>
+            <if test="gridId != null">
+                <![CDATA[ AND t2.social_id = #{socialId} ]]>
+            </if>
+        </where>
+        <![CDATA[ ORDER BY t1.warn_time DESC limit 0,10]]>
+    </select>
+</mapper>

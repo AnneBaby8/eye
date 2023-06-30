@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.core.mapper.WorkflowMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.core.entity.Workflow">
+        <result column="id" property="id" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="updator" property="updator" />
+        <result column="update_time" property="updateTime" />
+        <result column="del" property="del" />
+        <result column="event_warning_id" property="eventWarningId" />
+        <result column="area_name" property="areaName" />
+        <result column="event_type" property="eventType" />
+        <result column="stream_id" property="streamId" />
+        <result column="assign_grid_id" property="assignGridId" />
+        <result column="grid_id" property="gridId" />
+        <result column="street_id" property="streetId" />
+        <result column="social_id" property="socialId" />
+        <result column="area_id" property="areaId" />
+        <result column="version" property="version" />
+        <result column="status" property="status" />
+        <result column="warn_time" property="warnTime" />
+    </resultMap>
+
+</mapper>

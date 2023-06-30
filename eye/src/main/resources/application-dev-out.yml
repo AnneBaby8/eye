@@ -1,0 +1,40 @@
+spring:
+  datasource:
+   url: jdbc:mysql://11.64.3.193:3306/eye?charsetEncoding=UTF-8&serverTimezone=GMT%2B8&characterEncoding=utf-8
+   username: root
+   password: CityDo@987
+   platform: mysql
+   driver-class-name: com.mysql.cj.jdbc.Driver
+   maxActive: 20
+  redis:
+   host: 11.64.3.193 # Redis服务器地址
+   database: 4 # Redis数据库索引（默认为0）
+   port: 6379 # Redis服务器连接端口
+   password: CityDo@987 # Redis服务器连接密码（默认为空）
+   timeout: 3000 # 连接超时时间（毫秒）
+
+huawei:
+    url: https://111.33.175.77:18531
+    govExtUrl: https://10.165.23.226:18531
+
+huawei2:
+ huaweiAccount:
+  account: connect
+  pwd: Huawei@123
+ baseUrl: https://111.33.175.77:943
+ loginUrl: /sdk_service/rest/users/login/v1.1
+ facerepositoriesUrl: /sdk_service/rest/facerepositories/peoples
+ keepLoginUrl: /sdk_service/rest/management/options
+ taskUrl: /sdk_service/rest/video-analysis/search-suspect-task/v1.5
+ subscribeUrl: /sdk_service/rest/video-analysis/subscription
+ pushUrl: http://172.30.2.5:8090/eye/v1/huawei/alarmEvent/receive/faceData
+ peopleAlarmUrl: https://192.168.255.2:1156
+
+fileserver:
+ url: http://11.64.2.115:8090/eye
+ appUrl: http://111.33.175.45:8090/eye
+ saveBasePath: /home/citydo
+ savePath: /warnImages/
+ uploadPath: /warnImages/upload/
+ faceImagesPath: /faceImages
+ faceHeadSculpture: /warnImages/headSculpture/

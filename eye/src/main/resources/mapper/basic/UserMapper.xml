@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.basic.mapper.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.basic.entity.User">
+        <id column="id" property="id" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="updator" property="updator" />
+        <result column="update_time" property="updateTime" />
+        <result column="del" property="del" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="nickname" property="nickname" />
+        <result column="phone" property="phone" />
+        <result column="email" property="email" />
+        <result column="birthday" property="birthday" />
+        <result column="sex" property="sex" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!--根据部门获取网格员信息-->
+    <select id="selectDataListByDepartment" parameterType="java.util.Map" resultType="cn.com.citydo.module.basic.vo.UserVO">
+       <!-- <![CDATA[  SELECT
+        t4.*
+        FROM
+        sec_user_role t1
+        LEFT OUTER JOIN sec_role t2 ON t2.id = t1.role_id
+        LEFT OUTER JOIN sec_user_department t3 ON t3.user_id = t1.user_id
+        INNER JOIN sec_user t4 ON t1.user_id = t4.id
+        WHERE
+        t1.del = '0'
+        AND t2.del = '0'
+        AND t3.del = '0'
+        AND t4.del = '0'
+        AND t2.CODE = #{code} ]]>
+        AND t3.department_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>-->
+        select t1.id,t1.username ,t1.nickname,t4.department_id,t5.`name` departmentName from sec_user t1
+        inner join sec_user_role t2 on t1.id = t2.user_id
+        left outer join sec_role t3 on t2.role_id = t3.id
+        left outer join sec_user_department t4 on t4.user_id = t1.id
+        left outer join sec_department t5 on t4.department_id = t5.id
+            <if test='flag == "1" '>
+                inner join(
+                select * from sec_department where id = #{gridId}
+                )t6 on t4.department_id = t6.id
+            </if>
+            <if test='flag == "2" '>
+                inner join(
+                    select * from sec_department where parent_id = #{socialId} or id = #{socialId}
+                )t6 on t4.department_id = t6.id
+            </if>
+            <if test='flag == "3" '>
+                inner join(
+                    select * from sec_department where id = #{streetId}
+                    union
+                    select t1.* from sec_department t1 inner join
+                    (select * from sec_department where parent_id = #{streetId})t2 on t1.parent_id = t2.id
+                )t6 on t4.department_id = t6.id
+            </if>
+            <if test='flag == "4" '>
+                inner join(
+                    select * from sec_department where id = #{areaId} or parent_id = #{areaId}
+                    union
+                    select t.* from sec_department t inner join (
+                    select t1.id from sec_department t1 inner join
+                    (select * from sec_department where parent_id = #{areaId})t2 on t1.parent_id = t2.id) t3 on t.parent_id = t3.id
+                )t6 on t4.department_id = t6.id
+            </if>
+        where t3.code = #{code}
+    </select>
+
+    <select id="selectGridUserList" resultType="cn.com.citydo.module.basic.entity.User">
+        select t1.* from sec_user t1
+        left outer join sec_user_role t2 on t1.id = t2.user_id
+        left outer join sec_role t3 on t2.role_id = t3.id
+        where t1.del = '0' and t2.del = '0' and t3.del = '0' and t3.code = #{code}
+    </select>
+
+
+    <select id="selectGridUserListByParam" resultType="cn.com.citydo.module.core.vo.GridUserVO" parameterType="map">
+        <![CDATA[
+            select distinct t5.id gridId,t1.* from sec_user t1
+            inner join sec_user_role t2 on t1.id = t2.user_id
+            inner join sec_role t3 on t2.role_id = t3.id
+            inner join sec_user_department t4 on t1.id = t4.user_id
+            inner join (
+            select * from sec_department where parent_id = #{departmentId}
+            )t5 on t4.department_id = t5.id
+            where t1.del = 0 and t2.del = 0 and t3.del = 0 and t4.del = 0 and t5.del = 0 and t3.code = #{grid}
+        ]]>
+    </select>
+
+    <select id="selectGridMemberReportByParam" resultType="cn.com.citydo.module.basic.entity.User" parameterType="map">
+          select t1.* from sec_user t1
+            inner join sec_user_role t2 on t1.id = t2.user_id
+            inner join sec_role t3 on t2.role_id = t3.id
+            inner join sec_user_department t4 on t1.id = t4.user_id
+            where t1.del = 0 and t2.del = 0 and t3.del = 0 and t4.del = 0 and t4.department_id = #{departmentId}
+            and t3.code = #{code}
+    </select>
+</mapper>

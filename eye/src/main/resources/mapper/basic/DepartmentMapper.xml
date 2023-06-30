@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.basic.mapper.DepartmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.basic.entity.Department">
+        <id column="id" property="id" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="updator" property="updator" />
+        <result column="update_time" property="updateTime" />
+        <result column="del" property="del" />
+        <result column="name" property="name" />
+        <result column="parent_id" property="parentId" />
+    </resultMap>
+
+    <select id="selectDataListByRoleAndUser" parameterType="java.lang.Long" resultType="cn.com.citydo.module.basic.entity.Department">
+        select t2.* from sec_user_department t1
+        left outer join sec_department t2 on t1.department_id = t2.id
+        where t1.user_id = #{userId} and t1.del = '0' and t2.del = '0'
+    </select>
+
+    <select id="selectAreaDataList" resultType="cn.com.citydo.module.basic.vo.DepartmentVO">
+        select t1.* from sec_department t1 where t1.parent_id != '0'
+    </select>
+
+    <select id="selectStreetDataList" resultType="cn.com.citydo.module.basic.vo.DepartmentVO">
+        select * from sec_department where parent_id not in(
+        select id from sec_department where parent_id = '0') and parent_id != '0'
+    </select>
+
+    <select id="selectSocialDataList" resultType="cn.com.citydo.module.basic.vo.DepartmentVO">
+        select *
+        from sec_department t
+        where not EXISTS(
+        select tr.id from (select *
+        from sec_department
+        where parent_id = 0
+        union
+        select t1.*
+        from sec_department t1
+        inner join (select * from sec_department where parent_id = 0) t2
+        on t1.parent_id = t2.id
+        union
+        select *
+        from sec_department
+        where parent_id in
+        (select t1.id
+        from sec_department t1
+        inner join (select * from sec_department where parent_id = 0) t2
+        on t1.parent_id = t2.id)
+        ) tr where  tr.id = t.id
+        )
+    </select>
+
+    <select id="selectOnlyAreaDataList" resultType="cn.com.citydo.module.basic.vo.DepartmentVO">
+        select t1.* from sec_department t1 inner join (select * from sec_department where parent_id = 0) t2 on t1.parent_id = t2.id
+    </select>
+
+    <select id="selectOnlyStreetDataList" resultType="cn.com.citydo.module.basic.vo.DepartmentVO">
+        select * from sec_department where parent_id in (
+        select t1.id from sec_department t1 inner join (select * from sec_department where parent_id = 0) t2 on t1.parent_id = t2.id
+        )
+    </select>
+
+    <select id="selectAppSocialDataListByDepartmentId" resultType="cn.com.citydo.module.basic.vo.DepartmentVO" parameterType="java.lang.Long">
+        select * from sec_department where parent_id = 0
+        union
+        select * from sec_department where id = (select parent_id from sec_department where id = #{departmentId})
+        union
+        select * from sec_department where id = #{departmentId}
+        union
+        select * from sec_department where parent_id = #{departmentId}
+    </select>
+
+    <select id="selectPartDataList" resultType="cn.com.citydo.module.basic.vo.DepartmentVO">
+        select * from sec_department where parent_id = 0 and del = 0
+        union all
+        select t1.* from sec_department t1 inner join (select * from sec_department where parent_id = 0) t2 on t1.parent_id = t2.id where t1.del = 0
+        union all
+        select t3.* from sec_department t3 inner join (select * from sec_department where parent_id = (select id from sec_department where parent_id = 0))t4 on t3.parent_id = t4.id where t3.del = 0
+        union all
+        select t5.* from sec_department t5 inner join (select t3.* from sec_department t3 inner join (select * from sec_department where parent_id = (select id from sec_department where parent_id = 0))t4 on t3.parent_id = t4.id )
+        t6 on t5.parent_id = t6.id where t5.del = 0
+    </select>
+</mapper>

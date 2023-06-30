@@ -1,0 +1,71 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /eye
+spring:
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+  application:
+    name: eye
+  profiles:
+    active: dev-out
+  jackson:
+    #日期格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+swagger2:
+    apiInfo:
+      title: EYE-API
+      version: 1.0
+      description: EYE-API
+      contact:
+        name: blackcat
+        url: http://127.0.0.1
+        email: xxx
+    apis:
+      basePackage: cn.com.citydo
+
+mybatis-plus:
+      mapper-locations: classpath:/mapper/**/*.xml
+      global-config:
+        db-config:
+          #主键类型 0:"数据库ID自增" 1:"用户输入ID" 2:"全局唯一ID"(数字型唯一ID) 3:"全局唯一ID UUID"
+          id-type:
+          # 逻辑删除配置 需要字段加上注解 @Logic
+          logic-delete-value: 1
+          logic-not-delete-value: 0
+logging:
+  file: log/eye.log
+  file.max-size: 50MB
+  level:
+    cn.com.citydo: DEBUG
+
+jwt:
+  config:
+    key: blackcat
+    ttl: 7200000
+    remember: 604800000
+custom:
+  config:
+    ignores:
+      # 需要过滤的 post 请求
+      post:
+        - "/api/auth/login"
+        - "/api/auth/token"
+        - "/api/auth/appToken"
+        - "/api/kaptcha/default"
+      # 需要过滤的请求，不限方法
+      pattern:
+        - "/doc.html"
+        - "/swagger-resources/**"
+        - "/swagger-ui.html/**"
+        - "/v2/api-docs"
+        - "/webjars/**"
+        - "/api/media/**"
+        - "/api/data/**"
+        - "/v1/huawei/webhook"
+        - "/v1/huawei/webhook/carriy"
+        - "/v1/huawei/alarmEvent/**"
+        - "/warnImages/**"

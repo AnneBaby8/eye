@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.citydo.module.basic.mapper.RoleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.com.citydo.module.basic.entity.Role">
+        <id column="id" property="id" />
+        <result column="creator" property="creator" />
+        <result column="create_time" property="createTime" />
+        <result column="updator" property="updator" />
+        <result column="update_time" property="updateTime" />
+        <result column="del" property="del" />
+        <result column="name" property="name" />
+        <result column="description" property="description" />
+    </resultMap>
+
+    <select id="getRoleDetailByOutUserId" resultType="cn.com.citydo.module.basic.entity.Role">
+        select t1.* from sec_role t1
+        inner join sec_user_role t2 on t1.id = t2.role_id
+        inner join sec_user t3 on t2.user_id =  t3.id
+        where t1.del = 0 and t2.del = 0 and t3.del = 0 and t3.out_user_id = #{outUserId}
+    </select>
+
+    <select id="selectDataByParam" resultType="cn.com.citydo.module.basic.entity.Role">
+        select t1.* from sec_role t1 inner join sec_user_role t2 on t1.id = t2.role_id
+        where  t1.del = 0 and t2.del = 0
+        <if test="code != null and code != ''">
+            and t1.code = #{code}
+        </if>
+        <if test="userId != null">
+            and t2.user_id = #{userId}
+        </if>
+    </select>
+
+</mapper>
